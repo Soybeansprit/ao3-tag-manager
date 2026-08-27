@@ -45,3 +45,28 @@ AO3 原生的 Tag 排除功能通常只对当前搜索生效。这个脚本允�
 
 AO3 的作品筛选可以通过 URL 参数实现。
 
+## 安装使用
+
+### 1. 在浏览器安装 [Tampermonkey](https://www.tampermonkey.net/) 
+### 2. 安装 AO3 Tag 屏蔽器
+
+安装 Tampermonkey 后，点击下面的链接：
+
+**[点击安装 AO3 Tag 屏蔽器](https://raw.githubusercontent.com/Soybeansprit/ao3-tag-manager/main/ao3-tag-manager.user.js)**
+
+Tampermonkey 会自动打开用户脚本安装页面。
+
+点击 **「安装」** 即可。
+
+### 3. 确认安装
+
+打开 Tampermonkey 控制面板：
+
+```text
+Tampermonkey
+    ↓
+控制面板
+    ↓
+已安装的用户脚本
+
+
