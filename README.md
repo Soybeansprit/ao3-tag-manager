@@ -52,7 +52,7 @@ AO3 的作品筛选可以通过 URL 参数实现。
 
 安装 Tampermonkey 后，点击下面的链接：
 
-**[点击安装 AO3 Tag 屏蔽器](https://raw.githubusercontent.com/Soybeansprit/ao3-tag-manager/main/ao3-tag-manager.user.js)**
+**[点击安装 AO3 Tag Blocker](https://raw.githubusercontent.com/Soybeansprit/ao3-tag-manager/main/ao3-tag-manager.user.js)**
 
 Tampermonkey 会自动打开用户脚本安装页面。
 
@@ -74,7 +74,7 @@ Tampermonkey
 
 安装完成后打开 AO3
 
-**点击右上角 Tampermonkey 控制面板，打开 AO3 Tags Blocker**
+**点击右上角 Tampermonkey 控制面板，打开 AO3 Tag Blocker**
 
 页面右下角会出现：
 
