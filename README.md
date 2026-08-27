@@ -77,5 +77,7 @@ Tampermonkey
 
 `AO3 Tag Blocker` 按钮，点击即可管理需要长期屏蔽的 Tags。
 
+添加要屏蔽的 Tags 后，刷新页面或者下次请求即可生效。
+
 
 
