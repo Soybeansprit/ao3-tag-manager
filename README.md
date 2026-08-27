@@ -16,11 +16,8 @@ AO3 原生的 Tag 排除功能通常只对当前搜索生效。这个脚本允�
 - 在 AO3 页面中管理已保存的 Tags
 - 添加 Tag
 - 删除 Tag
-- 自动将保存的 Tags 添加到 AO3 URL
-- 已经存在于 URL 中的 Tag 不会重复添加
 - URL 没有发生变化时不会重新请求页面
 - 保留原 URL 中已有的其他参数
-- 支持分页
 - 支持 Tag 作品列表
 - 支持作者作品列表
 - 支持普通作品列表
@@ -72,9 +69,9 @@ Tampermonkey
 
 ### 4. 使用
 
-安装完成后打开 AO3
+安装完成后打开/刷新 AO3。
 
-**点击右上角 Tampermonkey 控制面板，打开 AO3 Tag Blocker**
+**点击右上角 Tampermonkey 快捷面板，打开 AO3 Tag Blocker。**
 
 页面右下角会出现：
 
