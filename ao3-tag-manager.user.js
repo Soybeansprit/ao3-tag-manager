@@ -1,5 +1,5 @@
 // ==UserScript==
-// @name         AO3 Excluded Tag Manager
+// @name         AO3 Tags Blocker
 // @namespace    https://github.com/Soybeansprit/ao3-tag-manager
 // @version      0.1.1
 // @description  Manage permanent excluded tags on AO3。实现永久屏蔽tags。
