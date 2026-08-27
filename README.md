@@ -78,9 +78,7 @@ Tampermonkey
 
 页面右下角会出现：
 
-`AO3 Tags`
-
-点击即可管理需要长期屏蔽的 Tags。
+`AO3 Tag Blocker` 按钮，点击即可管理需要长期屏蔽的 Tags。
 
 
 
