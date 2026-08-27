@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         AO3 Excluded Tag Manager
-// @namespace    https://archiveofourown.org/
+// @namespace    https://github.com/Soybeansprit/ao3-tag-manager
 // @version      0.2.0
 // @description  Manage permanent excluded tags on AO3。实现永久屏蔽tags。
 // @include        https://archiveofourown.org/*
