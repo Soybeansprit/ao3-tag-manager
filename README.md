@@ -68,5 +68,19 @@ Tampermonkey
 控制面板
     ↓
 已安装的用户脚本
+```
+
+### 4. 使用
+
+安装完成后打开 AO3
+
+**点击右上角 Tampermonkey 控制面板，打开 AO3 Tags Blocker**
+
+页面右下角会出现：
+
+`AO3 Tags`
+
+点击即可管理需要长期屏蔽的 Tags。
+
 
 
