@@ -736,7 +736,7 @@
 
 
         button.textContent =
-            "AO3 Tags";
+            "AO3 Tags Blocker";
 
 
         // 打开 / 关闭
