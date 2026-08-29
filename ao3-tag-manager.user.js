@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         AO3 Tag Blocker
 // @namespace    https://github.com/Soybeansprit/ao3-tag-manager
-// @version      0.1.3
+// @version      1.0.1
 // @author       Soybeansprit
 // @description  Manage permanent excluded tags on AO3。实现永久屏蔽tags。
 // @include        https://archiveofourown.org/*
@@ -34,9 +34,13 @@
 
     const EXCLUDED_TAG_PARAM =
         "work_search[excluded_tag_names]";
+    const QUERY_PARAM = "work_search[query]";
+    
+    
 
-    const STORAGE_KEY =
+    const EXCLUDED_TAGS_STORAGE_KEY =
         "excludedTags";
+    const EXCLUDED_KEYWORDS_STORAGE_KEY = "excludedKeywords";
 
 
     const DEFAULT_WORK_SEARCH_PARAMS = {
@@ -137,7 +141,7 @@
     function getExcludedTags() {
 
         return GM_getValue(
-            STORAGE_KEY,
+            EXCLUDED_TAGS_STORAGE_KEY,
             []
         );
     }
@@ -146,8 +150,22 @@
     function saveExcludedTags(tags) {
 
         GM_setValue(
-            STORAGE_KEY,
+            EXCLUDED_TAGS_STORAGE_KEY,
             tags
+        );
+    }
+    
+    function getExcludedKeywords() {
+        return GM_getValue(
+            EXCLUDED_KEYWORDS_STORAGE_KEY,
+            []
+        );
+    }
+
+    function saveExcludedKeywords(keywords) {
+        GM_setValue(
+            EXCLUDED_KEYWORDS_STORAGE_KEY,
+            keywords
         );
     }
 
@@ -173,6 +191,80 @@
             );
         }
     }
+    
+    // =========================================================
+    // URL：添加默认参数
+    // =========================================================
+    function updateExcludedKeywordsToUrl(
+     url, 
+     excludedKeywords,
+     pageType
+    ) {
+
+    if (!excludedKeywords.length) {
+        return false;
+    }
+
+    let currentQuery =
+        url.searchParams.get(QUERY_PARAM) || "";
+
+    let hasChanged = false;
+
+    if(pageType !== "WORK_SEARCH") {
+        for (const keyword of excludedKeywords) {
+
+            const excludeExpression =
+                `-"${keyword}"`;
+
+
+            // 如果当前 URL 已经有这个关键词
+            // 就不重复添加
+            if (
+                !currentQuery.includes(
+                    excludeExpression
+                )
+            ) {
+
+                currentQuery += excludeExpression;
+
+                hasChanged = true;
+            }
+        }
+    } else {
+        for (const keyword of excludedKeywords) {
+
+            const excludeExpression =
+                `NOT "${keyword}"`;
+
+
+            // 如果当前 URL 已经有这个关键词
+            // 就不重复添加
+            if (
+                !currentQuery.includes(
+                    excludeExpression
+                )
+            ) {
+
+                currentQuery += " " + excludeExpression;
+
+                hasChanged = true;
+            }
+        }
+
+    }
+
+
+    if (hasChanged) {
+
+        url.searchParams.set(
+            QUERY_PARAM,
+            currentQuery
+        );
+    }
+
+
+    return hasChanged;
+}
 
 
     // =========================================================
@@ -234,7 +326,8 @@
     function processUrl(
         url,
         pageType,
-        excludedTags
+        excludedTags,
+        excludeKeyWords
     ) {
 
         /*
@@ -246,10 +339,18 @@
         }
 
 
-        return updateExcludedTags(
+        const hasTagChange = updateExcludedTags(
             url,
             excludedTags
         );
+        
+        const hasKeyWordChange = updateExcludedKeywordsToUrl(
+            url,
+            excludeKeyWords,
+            pageType
+        );
+        
+        return hasTagChange || hasKeyWordChange
 
 
 
@@ -288,9 +389,11 @@
 
         const excludedTags =
             getExcludedTags();
+        const excludeKeyWords = 
+              getExcludedKeywords();
 
 
-        if (excludedTags.length === 0) {
+        if (excludedTags.length === 0 && excludeKeyWords.length === 0) {
             return;
         }
 
@@ -298,7 +401,8 @@
         const shouldUpdate = processUrl(
             url,
             pageType,
-            excludedTags
+            excludedTags,
+            excludeKeyWords
         );
 
 
@@ -387,6 +491,14 @@
 
                 width: 320px;
 
+                max-width:
+                    calc(100vw - 40px);
+
+                max-height:
+                    calc(100vh - 100px);
+
+                overflow-y: auto;
+
                 margin-bottom: 10px;
 
                 padding: 16px;
@@ -416,7 +528,7 @@
             }
 
 
-            #ao3-tag-manager-input {
+            .ao3-tag-manager-input {
 
                 width: 100%;
 
@@ -435,9 +547,28 @@
             }
 
 
-            #ao3-tag-manager-add {
+            #ao3-tag-add {
 
-                width: 100%;
+                width: 40%;
+
+                padding: 8px;
+
+                border: none;
+
+                border-radius: 4px;
+
+                background: #900;
+
+                color: white;
+
+                cursor: pointer;
+
+                font-size: 14px;
+            }
+
+            #ao3-keyword-add {
+
+                width: 40%;
 
                 padding: 8px;
 
@@ -455,7 +586,7 @@
             }
 
 
-            #ao3-tag-manager-list {
+            .ao3-tag-manager-list {
 
                 margin-top: 14px;
 
@@ -531,38 +662,119 @@
     // UI：刷新 Tag 列表
     // =========================================================
 
-    function renderTagList(listElement) {
 
-        listElement.innerHTML = "";
+    // 添加 Tag
+        function addTag(content) {
 
-
-        const tags =
-            getExcludedTags();
-
-
-        if (tags.length === 0) {
-
-            const empty =
-                document.createElement("div");
+            const tag =
+                content.trim();
 
 
-            empty.className =
-                "ao3-tag-empty";
+            if (!tag) {
+                return;
+            }
 
 
-            empty.textContent =
-                "还没有屏蔽任何 Tag";
+            const tags = getExcludedTags();
+
+            console.log("addTag", "tags: " + tags)
 
 
-            listElement.appendChild(empty);
+            /*
+             * 已经存在
+             */
+            if (tags.includes(tag)) {
 
-            return;
+                return;
+            }
+
+
+            tags.push(tag);
+
+            onsole.log("addTag", "new tags: " + tags)
+
+
+            saveExcludedTags(tags);
+        }
+        
+        
+        // add exclude keyword
+        function addExcludedKeyword(content) {
+
+            const keyword = content.trim();
+
+            if (!keyword) {
+                return;
+            }
+
+
+            const keywords = getExcludedKeywords();
+
+            console.log("addExcludedKeyword", "keywords: " + keywords)
+
+
+            if (
+                keywords.includes(keyword)
+            ) {
+                return;
+            }
+
+
+            keywords.push(keyword);
+
+            console.log("addExcludedKeyword", "new keywords: " + keywords)
+
+            saveExcludedKeywords(
+                keywords
+            );
+        }
+        
+        // delete exclude keyword
+        function removeExcludedKeyword(keyword) {
+
+            const keywords =
+                  getExcludedKeywords();
+
+            console.log("removeExcludedKeyword", "keywords: " + keywords)
+
+
+            const newKeywords =
+                keywords.filter(
+                    item => item !== keyword
+                );
+                
+            console.log("removeExcludedKeyword", "new keywords: " + newKeywords)
+
+
+            saveExcludedKeywords(
+                newKeywords
+            );
         }
 
+        // delete exclude keyword
+        function removeExcludedTag(tag) {
 
-        tags.forEach((tag, index) => {
+            const tags = getExcludedTags();
+            
+            console.log("removeExcludedTag", "tags: " + tags)
 
-            const item =
+
+            const newTags =
+                tags.filter(
+                    item => item !== tag
+                );
+
+            console.log("removeExcludedTag", "new tags: " + newTags)
+
+            
+
+            saveExcludedTags(
+                newTags
+            );
+        }
+
+    function rendTagOrKeywrodItem(content, type, listElement) {
+        const item =
                 document.createElement("div");
 
 
@@ -579,7 +791,7 @@
 
 
             name.textContent =
-                tag;
+                "[" + type + "] " + content;
 
 
             const deleteButton =
@@ -598,14 +810,11 @@
                 "click",
                 () => {
 
-                    const tags =
-                        getExcludedTags();
-
-
-                    tags.splice(index, 1);
-
-
-                    saveExcludedTags(tags);
+                    if(type === "TAG") {
+                        removeExcludedTag(content);
+                    } else if(type == "KEYWORD") {
+                        removeExcludedKeyword(content);
+                    }
 
 
                     renderTagList(
@@ -621,8 +830,43 @@
                 deleteButton
             );
 
-
             listElement.appendChild(item);
+    }
+
+    function renderTagList(listElement) {
+
+        listElement.innerHTML = "";
+
+
+        const tags = getExcludedTags();
+        const keywords = getExcludedKeywords();
+
+
+        if (tags.length === 0 && keywords.length === 0) {
+
+            const empty =
+                document.createElement("div");
+
+
+            empty.className =
+                "ao3-tag-empty";
+
+            empty.textContent =
+                "还没有屏蔽任何 Tag 或者 Keyword";
+            listElement.appendChild(empty);
+
+            return;
+        }
+
+
+        tags.forEach((tag) => {
+
+            rendTagOrKeywrodItem(tag, "TAG", listElement);
+        });
+
+        keywords.forEach((keyword) => {
+            rendTagOrKeywrodItem(keyword, "KEYWORD", listElement);
+            
         });
     }
 
@@ -681,52 +925,87 @@
 
 
         // 输入框
-        const input =
+        const tagInput =
             document.createElement("input");
 
 
-        input.id =
+        tagInput.className =
             "ao3-tag-manager-input";
 
 
-        input.type =
+        tagInput.type =
             "text";
 
 
-        input.placeholder =
+        tagInput.placeholder =
             "输入要屏蔽的 Tag";
 
+        // 输入框
+        const keywordInput =
+            document.createElement("input");
 
-        // 添加按钮
-        const addButton =
+
+        keywordInput.className =
+            "ao3-tag-manager-input";
+
+
+        keywordInput.type =
+            "text";
+
+
+        keywordInput.placeholder =
+            "输入要屏蔽的 Keyword";
+
+
+        // 添加Tag按钮
+        const addTagButton =
             document.createElement("button");
 
 
-        addButton.id =
-            "ao3-tag-manager-add";
+        addTagButton.id =
+            "ao3-tag-add";
 
 
-        addButton.textContent =
+        addTagButton.textContent =
             "添加 Tag";
+        
+        // 添加Keyword按钮
+        const addKeywordButton =
+            document.createElement("button");
+
+
+        addKeywordButton.id =
+            "ao3-keyword-add";
+
+
+        addKeywordButton.textContent =
+            "添加 Keyword";
 
 
         // Tag 列表
-        const list =
+        const tagList =
             document.createElement("div");
 
 
-        list.id =
+        tagList.className =
             "ao3-tag-manager-list";
+        
+        
+        
 
 
         // 组装 Panel
         panel.appendChild(title);
 
-        panel.appendChild(input);
+        panel.appendChild(tagInput);
 
-        panel.appendChild(addButton);
+        panel.appendChild(addTagButton);
 
-        panel.appendChild(list);
+        panel.appendChild(keywordInput);
+
+        panel.appendChild(addKeywordButton)
+
+        panel.appendChild(tagList);
 
 
         // 主按钮
@@ -759,62 +1038,37 @@
 
                 if (!isOpen) {
 
-                    renderTagList(list);
+                    renderTagList(tagList);
                 }
             }
         );
 
 
-        // 添加 Tag
-        function addTag() {
-
-            const tag =
-                input.value.trim();
+        
 
 
-            if (!tag) {
-                return;
-            }
-
-
-            const tags =
-                getExcludedTags();
-
-
-            /*
-             * 已经存在
-             */
-            if (tags.includes(tag)) {
-
-                input.value = "";
-
-                return;
-            }
-
-
-            tags.push(tag);
-
-
-            saveExcludedTags(tags);
-
-
-            input.value = "";
-
-
-            renderTagList(list);
-        }
-
-
-        addButton.addEventListener(
+        addTagButton.addEventListener(
             "click",
-            addTag
+            () => {
+                addTag(tagInput.value.trim());
+                tagInput.value = "";
+                renderTagList(tagList);
+            }
         );
+        addKeywordButton.addEventListener(
+            "click",
+            () => {
+                addExcludedKeyword(keywordInput.value.trim());
+                keywordInput.value = "";
+                renderTagList(tagList);
+            }
+        )
 
 
         /*
          * Enter 添加
          */
-        input.addEventListener(
+        tagInput.addEventListener(
             "keydown",
             event => {
 
@@ -822,10 +1076,29 @@
                     event.key === "Enter"
                 ) {
 
-                    addTag();
+                    addTag(tagInput.value.trim());
+                    tagInput.value = "";
+                    renderTagList(tagList);
                 }
             }
         );
+
+        keywordInput.addEventListener(
+            "keydown",
+            event => {
+
+                if (
+                    event.key === "Enter"
+                ) {
+
+                    addExcludedKeyword(keywordInput.value.trim());
+                    keywordInput.value = "";
+                    renderTagList(tagList);
+                }
+            }
+        );
+
+        
 
 
         container.appendChild(panel);
