@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         AO3 Tag Blocker
 // @namespace    https://github.com/Soybeansprit/ao3-tag-manager
-// @version      1.0.2
+// @version      1.0.3
 // @author       Soybeansprit
 // @description  Manage permanent excluded tags on AO3。实现永久屏蔽tags。
 // @include        https://archiveofourown.org/*
@@ -68,6 +68,15 @@
         "work_search[language_id]": ""
     };
 
+    const PAGE_TYPE = {
+        WORK_DETAIL: "WORK_DETAIL",
+        WORK_LIST: "WORK_LIST",
+        WORK_SEARCH: "WORK_SEARCH",
+        OTHER: "OTHER"
+    };
+
+    
+
 
     // =========================================================
     // 页面类型
@@ -80,37 +89,38 @@
 
         // 作品详情页
         if (/^\/works\/\d+$/.test(pathname)) {
-            return "WORK_DETAIL";
+            return PAGE_TYPE.WORK_DETAIL;
         }
 
 
         // 关键词搜索
         if (pathname === "/works/search") {
-            return "WORK_SEARCH";
+            return PAGE_TYPE.WORK_SEARCH;
         }
 
 
         // 普通作品列表
-        if (pathname === "/works") {
-            return "WORK_LIST";
+        if (pathname === "/works" 
+            || pathname.endsWith("/works")) {
+            return PAGE_TYPE.WORK_LIST;
         }
 
 
-        // Tag 作品列表
-        if (/^\/tags\/.+\/works$/.test(pathname)) {
-            return "TAG_WORKS";
-        }
+        // // Tag 作品列表
+        // if (/^\/tags\/.+\/works$/.test(pathname)) {
+        //     return "TAG_WORKS";
+        // }
 
 
-        // 作者作品列表
-        if (
-            /^\/users\/[^/]+\/pseuds\/[^/]+\/works$/.test(pathname)
-        ) {
-            return "AUTHOR_WORKS";
-        }
+        // // 作者作品列表
+        // if (
+        //     /^\/users\/[^/]+\/pseuds\/[^/]+\/works$/.test(pathname)
+        // ) {
+        //     return "AUTHOR_WORKS";
+        // }
 
 
-        return "OTHER";
+        return PAGE_TYPE.OTHER;
     }
 
 
@@ -122,10 +132,8 @@
 
         switch (pageType) {
 
-            case "WORK_LIST":
-            case "WORK_SEARCH":
-            case "TAG_WORKS":
-            case "AUTHOR_WORKS":
+            case PAGE_TYPE.WORK_LIST:
+            case PAGE_TYPE.WORK_SEARCH:
                 return true;
 
             default:
@@ -210,7 +218,7 @@
 
     let hasChanged = false;
 
-    if(pageType !== "WORK_SEARCH") {
+    if(pageType !== PAGE_TYPE.WORK_SEARCH) {
         for (const keyword of excludedKeywords) {
 
             const excludeExpression =
@@ -333,7 +341,7 @@
         /*
          * WORK_SEARCH 不添加默认参数
          */
-        if (pageType !== "WORK_SEARCH") {
+        if (pageType !== PAGE_TYPE.WORK_SEARCH) {
 
             addDefaultWorkSearchParams(url);
         }
