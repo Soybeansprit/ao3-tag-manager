@@ -2,9 +2,9 @@
 
 一个用于 [Archive of Our Own (AO3)](https://archiveofourown.org/) 的 Tampermonkey 用户脚本。
 
-用于管理需要长期屏蔽的 AO3 Tags。
+用于管理需要长期屏蔽的 AO3 Tags 和 Keywords。**Tags 为作者给文章添加的标签；Keywords 为文章中包括目录、标签、文章内容中的精准关键词。**
 
-AO3 原生的 Tag 排除功能通常只对当前搜索生效。这个脚本允许用户保存一组长期需要排除的 Tags，在访问 AO3 作品列表、Tag 作品列表或作者作品列表时，自动将这些 Tags 添加到 `work_search[excluded_tag_names]` 参数中。
+AO3 原生的 Tag/Keywords 的屏蔽功能通常只对当前搜索生效。这个脚本允许用户保存一组长期需要排除的 Tags/Keywords，在访问 AO3 作品列表、Tag 作品列表或作者作品列表时，自动将这些 Tags 添加到 `work_search[excluded_tag_names]` 参数中。
 
 ---
 
@@ -12,10 +12,8 @@ AO3 原生的 Tag 排除功能通常只对当前搜索生效。这个脚本允�
 
 ### 已实现
 
-- 保存需要长期屏蔽的 Tags
-- 在 AO3 页面中管理已保存的 Tags
-- 添加 Tag
-- 删除 Tag
+- 保存需要长期屏蔽的 Tags（支持添加 Tag｜删除 Tag）
+- 保存需要长期屏蔽的关键词 Keywords（支持添加 Keywords｜删除 Keywords）
 - URL 没有发生变化时不会重新请求页面
 - 保留原 URL 中已有的其他参数
 - 支持 Tag 作品列表
@@ -75,9 +73,8 @@ Tampermonkey
 
 页面右下角会出现：
 
-`AO3 Tag Blocker` 按钮，点击即可管理需要长期屏蔽的 Tags。
+`AO3 Tag Blocker` 按钮，点击即可管理需要长期屏蔽的 Tags 和 Keywords。
 
-添加要屏蔽的 Tags 后，刷新页面或者下次请求即可生效。
-
+添加要屏蔽的 Tags/Keywords 后，刷新页面或者下次请求即可生效。
 
 
