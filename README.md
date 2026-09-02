@@ -81,4 +81,16 @@ Tampermonkey
 
 添加要屏蔽的 Tags/Keywords 后，刷新页面或者下次请求即可生效。
 
+使用可参考该视频：
+
+https://github.com/user-attachments/assets/63f16150-a0cb-4bc8-9047-49e56979f4b6
+
+
+
+
+
+
+
+
+
 
